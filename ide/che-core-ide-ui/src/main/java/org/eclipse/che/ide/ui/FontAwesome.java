@@ -100,16 +100,15 @@ public class FontAwesome {
     /**
      * http://fontawesome.io/icon/columns/
      */
-    public static final String COLUMNS = "<i class=\"fa fa-columns\" aria-hidden=\"true\"></i>";
+    public static final String COLUMNS = "<i class=\"fa fa-columns\"></i>";
 
     /**
      * http://fontawesome.io/icon/minus-square-o/
      */
-    public static final String MINUS_SQUARE_O = "<i class=\"fa fa-minus-square-o\" aria-hidden=\"true\"></i>";
+    public static final String MINUS_SQUARE_O = "<i class=\"fa fa-minus-square-o\"></i>";
 
     /**
      * http://fontawesome.io/icon/square-o/
      */
-    public static final String SQUARE_O = "<i class=\"fa fa-square-o\" aria-hidden=\"true\"></i>";
-
+    public static final String SQUARE_O = "<i class=\"fa fa-square-o\"></i>";
 }
