@@ -63,4 +63,9 @@ public class TerminalsPanelPresenter extends ConsolesPanelPresenter {
     public void addCommandOutput(@NotNull String machineId, @NotNull OutputConsole outputConsole) {
         //we don't support this operation for additional terminals' panel
     }
+
+    @Override
+    protected void updateCommandOutput(@NotNull final String command, @NotNull OutputConsole outputConsole) {
+        //we don't support this operation for additional terminals' panel
+    }
 }

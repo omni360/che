@@ -347,7 +347,7 @@ public class ConsolesPanelPresenter implements ConsolesPanelView.ActionDelegate,
         workspaceAgent.setActivePart(parent);
     }
 
-    private void updateCommandOutput(@NotNull final String command, @NotNull OutputConsole outputConsole) {
+    protected void updateCommandOutput(@NotNull final String command, @NotNull OutputConsole outputConsole) {
         consoles.put(command, outputConsole);
         consoleCommands.put(outputConsole, command);
 
