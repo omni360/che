@@ -17,6 +17,7 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
+import org.eclipse.che.ide.api.machine.events.DevMachineStateEvent;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
@@ -80,7 +81,9 @@ public class ConsolesPanelPresenter implements ConsolesPanelView.ActionDelegate,
                                                                      OutputConsole.ConsoleOutputListener,
                                                                      WorkspaceStartingEvent.Handler,
                                                                      WorkspaceStoppedEvent.Handler,
-                                                                     MachineStateEvent.Handler {
+                                                                     MachineStateEvent.Handler,
+                                                                     DevMachineStateEvent.Handler {
+
     private static final String DEFAULT_TERMINAL_NAME = "Terminal";
 
     public static final String SSH_PORT = "22";
@@ -156,6 +159,7 @@ public class ConsolesPanelPresenter implements ConsolesPanelView.ActionDelegate,
         eventBus.addHandler(WorkspaceStartingEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
         eventBus.addHandler(MachineStateEvent.TYPE, this);
+        eventBus.addHandler(DevMachineStateEvent.TYPE, this);
 
         rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, rootNodes);
 
@@ -209,6 +213,14 @@ public class ConsolesPanelPresenter implements ConsolesPanelView.ActionDelegate,
         onStopCommandProcess(destroyedMachineNode);
 
         view.setProcessesData(rootNode);
+    }
+
+    @Override
+    public void onDevMachineStarted(DevMachineStateEvent event) {
+    }
+
+    @Override
+    public void onDevMachineDestroyed(DevMachineStateEvent event) {
     }
 
     /** Get the list of all available machines. */
