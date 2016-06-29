@@ -29,6 +29,7 @@ import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.api.machine.server.exception.InvalidRecipeException;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
+import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
 import org.eclipse.che.api.machine.server.exception.UnsupportedRecipeException;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;
@@ -39,11 +40,12 @@ import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.DockerFileException;
-import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.client.Dockerfile;
 import org.eclipse.che.plugin.docker.client.DockerfileParser;
 import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
+import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
+import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
 import org.eclipse.che.plugin.docker.client.params.AttachContainerParams;
@@ -283,8 +285,12 @@ public class DockerInstanceProvider implements InstanceProvider {
      *         if other error occurs
      */
     @Override
-    public Instance createInstance(final Machine machine, final LineConsumer creationLogsOutput)
-            throws UnsupportedRecipeException, InvalidRecipeException, NotFoundException, MachineException {
+    public Instance createInstance(Machine machine,
+                                   LineConsumer creationLogsOutput) throws UnsupportedRecipeException,
+                                                                           InvalidRecipeException,
+                                                                           SourceNotFoundException,
+                                                                           NotFoundException,
+                                                                           MachineException {
 
         // based on machine source, do the right steps
         MachineConfig machineConfig = machine.getConfig();
@@ -328,8 +334,11 @@ public class DockerInstanceProvider implements InstanceProvider {
                               creationLogsOutput);
     }
 
-    protected Instance createInstanceFromImage(final Machine machine, String machineContainerName,
-                                        final LineConsumer creationLogsOutput) throws NotFoundException, MachineException {
+    protected Instance createInstanceFromImage(Machine machine,
+                                               String machineContainerName,
+                                               LineConsumer creationLogsOutput) throws NotFoundException,
+                                                                                       MachineException,
+                                                                                       SourceNotFoundException {
         final DockerMachineSource dockerMachineSource = new DockerMachineSource(machine.getConfig().getSource());
 
         if (snapshotUseRegistry) {
@@ -341,8 +350,10 @@ public class DockerInstanceProvider implements InstanceProvider {
         try {
             // tag image with generated name to allow sysadmin recognize it
             docker.tag(TagParams.create(fullNameOfPulledImage, machineImageName));
-        } catch (IOException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+        } catch (ImageNotFoundException nfEx) {
+            throw new SourceNotFoundException(nfEx.getLocalizedMessage(), nfEx);
+        } catch (IOException ioEx) {
+            LOG.error(ioEx.getLocalizedMessage(), ioEx);
             throw new MachineException("Can't create machine from snapshot.");
         }
         try {

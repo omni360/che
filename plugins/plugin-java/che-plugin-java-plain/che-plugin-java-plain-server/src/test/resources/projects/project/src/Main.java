@@ -8,23 +8,10 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.workspace.event;
+public class Main {
 
-import com.google.gwt.event.shared.EventHandler;
-
-/**
- * Is fired when workspace has been stopped.
- *
- * @author Vitaliy Guliy
- */
-public interface WorkspaceStoppedHandler extends EventHandler {
-
-    /**
-     * Perform actions when workspace is stopped.
-     *
-     * @param event
-     *         workspace stopped event
-     */
-    void onWorkspaceStopped(WorkspaceStoppedEvent event);
-
+    public static void main(String[] args) {
+        // write your code here
+        System.out.println("Hello World!");
+    }
 }
