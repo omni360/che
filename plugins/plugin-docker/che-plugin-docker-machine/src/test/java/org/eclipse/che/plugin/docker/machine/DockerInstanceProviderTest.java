@@ -36,8 +36,11 @@ import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.dto.AuthConfigs;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
+import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
+import org.eclipse.che.plugin.docker.client.json.ContainerState;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
+import org.eclipse.che.plugin.docker.client.params.InspectContainerParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
@@ -119,6 +122,12 @@ public class DockerInstanceProviderTest {
     @Mock
     private UserSpecificDockerRegistryCredentialsProvider credentialsReader;
 
+    @Mock
+    private ContainerInfo containerInfo;
+
+    @Mock
+    private ContainerState containerState;
+
     @Captor
     private ArgumentCaptor<CreateContainerParams> createContainerParamsArgumentCaptor;
 
@@ -163,6 +172,9 @@ public class DockerInstanceProviderTest {
         when(dockerMachineFactory.createNode(anyString(), anyString())).thenReturn(dockerNode);
         when(dockerConnector.createContainer(any(CreateContainerParams.class)))
                 .thenReturn(new ContainerCreated(CONTAINER_ID, new String[0]));
+        when(dockerConnector.inspectContainer(any(InspectContainerParams.class))).thenReturn(containerInfo);
+        when(containerInfo.getState()).thenReturn(containerState);
+        when(containerState.isRunning()).thenReturn(false);
     }
 
     @AfterMethod

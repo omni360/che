@@ -48,6 +48,7 @@ import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
 import org.eclipse.che.plugin.docker.client.params.AttachContainerParams;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
+import org.eclipse.che.plugin.docker.client.params.InspectContainerParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
@@ -57,7 +58,6 @@ import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PreDestroy;
 import javax.inject.Named;
 import javax.ws.rs.core.UriBuilder;
 import java.io.File;
@@ -77,7 +77,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -577,17 +577,41 @@ public class DockerInstanceProvider implements InstanceProvider {
 
             docker.startContainer(StartContainerParams.create(containerId));
 
-            executor.execute(() -> {
-                try {
-                    docker.attachContainer(AttachContainerParams.create(containerId)
-                                                                .withStream(true),
-                                           new LogMessagePrinter(outputConsumer));
-                } catch (SocketTimeoutException ignore) {
-                    // It means that workspace is stopped due to timeout and no need to stream logs anymore.
-                } catch (IOException e) {
-                    LOG.warn("Failed to stream events from container {} with {} id", containerName, containerId);
+            Future containerMessageReaderThread = executor.submit(() -> {
+                boolean isContainerRunning = true;
+                while (isContainerRunning) {
+                    try {
+                        docker.attachContainer(AttachContainerParams.create(containerId)
+                                                                    .withStream(true),
+                                               new LogMessagePrinter(outputConsumer));
+                        isContainerRunning =false;
+                    } catch (SocketTimeoutException ste) {
+                        try {
+                            isContainerRunning = docker.inspectContainer(InspectContainerParams.create(containerId)).getState().isRunning();
+                        } catch (IOException e) {
+                            // it is ok, container was deleted
+                            isContainerRunning = false;
+                        }
+                        // retry connection if container is running
+                    } catch (IOException e) {
+                        LOG.warn("Failed to stream events from container {} with {} id", containerName, containerId);
+                    }
                 }
             });
+
+            boolean isContainerRunning;
+            try {
+                isContainerRunning = docker.inspectContainer(InspectContainerParams.create(containerId)).getState().isRunning();
+            } catch (IOException e) {
+                // container was deleted
+                isContainerRunning = false;
+            }
+            if (!isContainerRunning) {
+                // detach from container if it not running
+                if (!containerMessageReaderThread.cancel(true)) {
+                    LOG.error("Cannot detach from container {} with {} id", containerName, containerId);
+                }
+            }
 
             final DockerNode node = dockerMachineFactory.createNode(machine.getWorkspaceId(), containerId);
             if (machine.getConfig().isDev()) {
