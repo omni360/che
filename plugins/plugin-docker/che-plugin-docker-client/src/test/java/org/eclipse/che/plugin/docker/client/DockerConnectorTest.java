@@ -128,6 +128,7 @@ public class DockerConnectorTest {
     private static final String   STREAM_DATA           = "stream data";
     private static final String   DOCKER_RESPONSE       = "stream";
     private static final String   ERROR_MESSAGE         = "some error occurs";
+    private static final String   API_VERSION_PREFIX    = "";
     private static final String[] CMD_WITH_ARGS         = {"command", "arg1", "arg2"};
     private static final String[] CMD_ARGS              = {"arg1", "arg2"};
     private static final byte[]   STREAM_DATA_BYTES     = STREAM_DATA.getBytes();
@@ -145,21 +146,23 @@ public class DockerConnectorTest {
     @Mock
     private DockerResponse               dockerResponse;
     @Mock
-    private ProgressMonitor              progressMonitor;
+    private ProgressMonitor                    progressMonitor;
     @Mock
-    private InitialAuthConfig            initialAuthConfig;
+    private InitialAuthConfig                  initialAuthConfig;
     @Mock
-    private AuthConfigs                  authConfigs;
+    private AuthConfigs                        authConfigs;
     @Mock
-    private InputStream                  inputStream;
+    private InputStream                        inputStream;
     @Mock
-    private MessageProcessor<LogMessage> logMessageProcessor;
+    private MessageProcessor<LogMessage>       logMessageProcessor;
     @Mock
-    private MessageProcessor<Event>      eventMessageProcessor;
+    private MessageProcessor<Event>            eventMessageProcessor;
     @Mock
-    private File                         dockerfile;
+    private File                               dockerfile;
     @Mock
-    private DockerRegistryAuthResolver   authManager;
+    private DockerRegistryAuthResolver         authManager;
+    @Mock
+    private DockerApiVersionPathPrefixProvider dockerApiVersionPathPrefixProvider;
 
     @Captor
     private ArgumentCaptor<Object> captor;
@@ -174,8 +177,12 @@ public class DockerConnectorTest {
         when(dockerResponse.getInputStream()).thenReturn(inputStream);
         when(initialAuthConfig.getAuthConfigs()).thenReturn(authConfigs);
         when(authConfigs.getConfigs()).thenReturn(new HashMap<>());
+        when(dockerApiVersionPathPrefixProvider.get()).thenReturn(API_VERSION_PREFIX);
 
-        dockerConnector = spy(new DockerConnector(dockerConnectorConfiguration, dockerConnectionFactory, authManager));
+        dockerConnector = spy(new DockerConnector(dockerConnectorConfiguration,
+                                                  dockerConnectionFactory,
+                                                  authManager,
+                                                  dockerApiVersionPathPrefixProvider));
 
         doReturn(new DockerException(EXCEPTION_ERROR_MESSAGE, RESPONSE_ERROR_CODE))
                 .when(dockerConnector).getDockerException(any(DockerResponse.class));
