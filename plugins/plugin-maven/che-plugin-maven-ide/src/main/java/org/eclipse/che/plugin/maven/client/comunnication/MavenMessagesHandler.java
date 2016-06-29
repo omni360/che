@@ -28,7 +28,6 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.collections.Jso;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.ext.java.client.event.DependencyUpdatedEvent;
 import org.eclipse.che.plugin.maven.client.comunnication.progressor.background.BackgroundLoaderPresenter;
 import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 import org.eclipse.che.plugin.maven.shared.MessageType;
@@ -136,7 +135,6 @@ public class MavenMessagesHandler {
         if (dto.isStart()) {
             dependencyResolver.show();
         } else {
-            eventBus.fireEvent(new DependencyUpdatedEvent());
             dependencyResolver.hide();
         }
     }
