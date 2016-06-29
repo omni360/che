@@ -19,6 +19,10 @@ import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -27,10 +31,16 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.core.search.TypeNameMatchRequestor;
+import org.eclipse.jdt.internal.core.JavaModel;
+import org.eclipse.jdt.internal.core.JavaModelManager;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IRegion;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.String.format;
 import static org.eclipse.jdt.core.search.SearchEngine.createWorkspaceScope;
 
 /**
@@ -39,6 +49,8 @@ import static org.eclipse.jdt.core.search.SearchEngine.createWorkspaceScope;
  * @author Alexander Andrienko
  */
 public class JavaDebuggerUtils {
+
+    private static final JavaModel MODEL = JavaModelManager.getJavaModelManager().getJavaModel();
 
     /**
      * Returns Location for current debugger resource.
@@ -127,5 +139,111 @@ public class JavaDebuggerUtils {
                                         IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
                                         new NullProgressMonitor());
         return result;
+    }
+
+    @Nullable
+    public IType findTypeByPosition(String projectPath, String fqn, int lineNumber) throws DebuggerException {
+        IJavaProject project = MODEL.getJavaProject(projectPath);
+
+        IType outerClass;
+        IMember iMember;
+        try {
+            outerClass = project.findType(fqn);
+
+            if (outerClass == null) {
+                return null;
+            }
+
+            String source;
+            if (outerClass.isBinary()) {
+                IClassFile classFile = outerClass.getClassFile();
+                source = classFile.getSource();
+            } else {
+                ICompilationUnit unit = outerClass.getCompilationUnit();
+                source = unit.getSource();
+            }
+
+            Document document = new Document(source);
+            IRegion region = document.getLineInformation(lineNumber);
+            int start = region.getOffset();
+            int end = start + region.getLength();
+
+            iMember = binSearch(outerClass, start, end);
+        } catch (JavaModelException e) {
+            throw new DebuggerException(format("Unable to find source for class with fqn '%s' in the project '%s'", fqn, project), e);
+        } catch (BadLocationException e) {
+            throw new DebuggerException("Unable to calculate breakpoint location", e);
+        }
+
+        if (iMember == null) {
+            return outerClass;
+        }
+        if (iMember instanceof IType) {
+            return (IType)iMember;
+        } else {
+            return iMember.getDeclaringType();
+        }
+    }
+
+    /**
+     * Searches the given source range of the container for a member that is
+     * not the same as the given type.
+     * @param type the {@link IType}
+     * @param start the starting position
+     * @param end the ending position
+     * @return the {@link IMember} from the given start-end range
+     * @throws JavaModelException if there is a problem with the backing Java model
+     */
+    @Nullable
+    private IMember binSearch(IType type, int start, int end) throws JavaModelException {
+        IJavaElement je = getElementAt(type, start);
+        if (je != null && !je.equals(type)) {
+            return asMember(je);
+        }
+        if (end > start) {
+            je = getElementAt(type, end);
+            if (je != null && !je.equals(type)) {
+                return asMember(je);
+            }
+            int mid = ((end - start) / 2) + start;
+            if (mid > start) {
+                je = binSearch(type, start + 1, mid);
+                if (je == null) {
+                    je = binSearch(type, mid + 1, end - 1);
+                }
+                return asMember(je);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the given Java element if it is an
+     * <code>IMember</code>, otherwise <code>null</code>.
+     *
+     * @param element Java element
+     * @return the given element if it is a type member,
+     * 	otherwise <code>null</code>
+     */
+    @Nullable
+    private static IMember asMember(IJavaElement element) {
+        if (element instanceof IMember) {
+            return (IMember)element;
+        }
+        return null;
+    }
+
+    /**
+     * Returns the element at the given position in the given type
+     * @param type the {@link IType}
+     * @param pos the position
+     * @return the {@link IJavaElement} at the given position
+     * @throws JavaModelException if there is a problem with the backing Java model
+     */
+    private static IJavaElement getElementAt(IType type, int pos) throws JavaModelException {
+        if (type.isBinary()) {
+            return type.getClassFile().getElementAt(pos);
+        }
+        return type.getCompilationUnit().getElementAt(pos);
     }
 }
