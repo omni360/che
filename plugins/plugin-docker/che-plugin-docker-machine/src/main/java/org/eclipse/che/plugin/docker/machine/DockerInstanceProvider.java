@@ -45,11 +45,13 @@ import org.eclipse.che.plugin.docker.client.DockerfileParser;
 import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
+import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
 import org.eclipse.che.plugin.docker.client.params.AttachContainerParams;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
+import org.eclipse.che.plugin.docker.client.params.GetContainerLogsParams;
 import org.eclipse.che.plugin.docker.client.params.InspectContainerParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
@@ -588,41 +590,29 @@ public class DockerInstanceProvider implements InstanceProvider {
 
             docker.startContainer(StartContainerParams.create(containerId));
 
-            Future containerMessageReaderThread = executor.submit(() -> {
+            executor.execute(() -> {
+                long lastProcessedLogDate = 0;
                 boolean isContainerRunning = true;
-                while (isContainerRunning) {
+                while(isContainerRunning) {
                     try {
-                        docker.attachContainer(AttachContainerParams.create(containerId)
-                                                                    .withStream(true),
-                                               new LogMessagePrinter(outputConsumer));
-                        isContainerRunning =false;
+                        docker.getContainerLogs(GetContainerLogsParams.create(containerId)
+                                                                      .withFollow(true)
+                                                                      .withSince(lastProcessedLogDate),
+                                                new LogMessagePrinter(outputConsumer));
+                        isContainerRunning = false;
                     } catch (SocketTimeoutException ste) {
-                        try {
-                            isContainerRunning = docker.inspectContainer(InspectContainerParams.create(containerId)).getState().isRunning();
-                        } catch (IOException e) {
-                            // it is ok, container was deleted
-                            isContainerRunning = false;
-                        }
-                        // retry connection if container is running
+                        lastProcessedLogDate = System.currentTimeMillis() / 1000L;
+                        // reconnect to container
+                    } catch (ContainerNotFoundException e) {
+                        isContainerRunning = false;
                     } catch (IOException e) {
-                        LOG.warn("Failed to stream events from container {} with {} id", containerName, containerId);
+                        LOG.error("Failed to get logs from machine {} backed by container {} with {} id",
+                                  machine,
+                                  containerName,
+                                  containerId);
                     }
                 }
             });
-
-            boolean isContainerRunning;
-            try {
-                isContainerRunning = docker.inspectContainer(InspectContainerParams.create(containerId)).getState().isRunning();
-            } catch (IOException e) {
-                // container was deleted
-                isContainerRunning = false;
-            }
-            if (!isContainerRunning) {
-                // detach from container if it not running
-                if (!containerMessageReaderThread.cancel(true)) {
-                    LOG.error("Cannot detach from container {} with {} id", containerName, containerId);
-                }
-            }
 
             final DockerNode node = dockerMachineFactory.createNode(machine.getWorkspaceId(), containerId);
             if (machine.getConfig().isDev()) {
