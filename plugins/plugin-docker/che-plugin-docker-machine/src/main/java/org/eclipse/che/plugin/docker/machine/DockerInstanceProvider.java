@@ -47,8 +47,11 @@ import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredential
 import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
+import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
+import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
+import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
@@ -61,8 +64,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -347,7 +348,7 @@ public class DockerInstanceProvider implements InstanceProvider {
         }
         try {
             // remove unneeded tag
-            docker.removeImage(fullNameOfPulledImage, false);
+            docker.removeImage(RemoveImageParams.create(fullNameOfPulledImage).withForce(false));
         } catch (IOException e) {
             LOG.error(e.getLocalizedMessage(), e);
         }
@@ -408,13 +409,13 @@ public class DockerInstanceProvider implements InstanceProvider {
                     LOG.error(e.getLocalizedMessage(), e);
                 }
             };
-            docker.buildImage(imageName,
-                              progressMonitor,
-                              dockerCredentials.getCredentials(),
-                              doForcePullOnBuild,
-                              memoryLimit,
-                              memorySwapLimit,
-                              files.toArray(new File[files.size()]));
+            docker.buildImage(BuildImageParams.create(files.toArray(new File[files.size()]))
+                                              .withRepository(imageName)
+                                              .withAuthConfigs(dockerCredentials.getCredentials())
+                                              .withDoForcePull(doForcePullOnBuild)
+                                              .withMemoryLimit(memoryLimit)
+                                              .withMemorySwapLimit(memorySwapLimit),
+                              progressMonitor);
         } catch (IOException | InterruptedException e) {
             throw new MachineException(e.getMessage(), e);
         } finally {
@@ -571,9 +572,11 @@ public class DockerInstanceProvider implements InstanceProvider {
                                                                 .withHostConfig(hostConfig)
                                                                 .withEnv(env.toArray(new String[env.size()]));
 
-            final String containerId = docker.createContainer(config, containerName).getId();
+            final String containerId = docker.createContainer(CreateContainerParams.create(config)
+                                                                                   .withContainerName(containerName))
+                                             .getId();
 
-            docker.startContainer(containerId, null);
+            docker.startContainer(StartContainerParams.create(containerId));
 
             final DockerNode node = dockerMachineFactory.createNode(machine.getWorkspaceId(), containerId);
             if (machine.getConfig().isDev()) {
