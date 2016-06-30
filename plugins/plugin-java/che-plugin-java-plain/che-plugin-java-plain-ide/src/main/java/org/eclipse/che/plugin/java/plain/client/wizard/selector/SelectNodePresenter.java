@@ -20,6 +20,7 @@ import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Presenter for choosing source directory.
@@ -68,7 +69,7 @@ public class SelectNodePresenter implements SelectNodeView.ActionDelegate {
 
     /** {@inheritDoc} */
     @Override
-    public void setSelectedNode(String path) {
-        selectionDelegate.onNodeSelected(path);
+    public void setSelectedNode(List<Node> selectedNodes) {
+        selectionDelegate.onNodeSelected(selectedNodes);
     }
 }
