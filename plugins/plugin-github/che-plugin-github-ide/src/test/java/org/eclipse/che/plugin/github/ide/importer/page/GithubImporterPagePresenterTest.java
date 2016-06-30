@@ -238,7 +238,7 @@ public class GithubImporterPagePresenterTest {
         String incorrectUrl = " https://github.com/codenvy/ide.git";
         when(view.getProjectName()).thenReturn("");
 
-        presenter.projectUrlChanged(incorrectUrl);
+        presenter.onProjectUrlChanged(incorrectUrl);
 
         verify(view).markURLInvalid();
         verify(view).setURLErrorMessage(eq(locale.importProjectMessageStartWithWhiteSpace()));
@@ -253,7 +253,7 @@ public class GithubImporterPagePresenterTest {
         String correctUrl = "host.xz:path/to/repo.git";
         when(view.getProjectName()).thenReturn("");
 
-        presenter.projectUrlChanged(correctUrl);
+        presenter.onProjectUrlChanged(correctUrl);
 
         verifyInvocationsForCorrectUrl(correctUrl);
     }
@@ -263,7 +263,7 @@ public class GithubImporterPagePresenterTest {
         String correctUrl = "git@hostname.com:projectName.git";
         when(view.getProjectName()).thenReturn("");
 
-        presenter.projectUrlChanged(correctUrl);
+        presenter.onProjectUrlChanged(correctUrl);
 
         verifyInvocationsForCorrectUrl(correctUrl);
     }
@@ -274,7 +274,7 @@ public class GithubImporterPagePresenterTest {
         String correctUrl = "ssh://host.com/some/path";
         when(view.getProjectName()).thenReturn("");
 
-        presenter.projectUrlChanged(correctUrl);
+        presenter.onProjectUrlChanged(correctUrl);
 
         verifyInvocationsForCorrectUrl(correctUrl);
     }
@@ -285,7 +285,7 @@ public class GithubImporterPagePresenterTest {
         String correctUrl = "ssh://host.com:port/some/path";
         when(view.getProjectName()).thenReturn("");
 
-        presenter.projectUrlChanged(correctUrl);
+        presenter.onProjectUrlChanged(correctUrl);
 
         verifyInvocationsForCorrectUrl(correctUrl);
     }
@@ -296,7 +296,7 @@ public class GithubImporterPagePresenterTest {
         String correctUrl = "git://host.com/user/repo";
         when(view.getProjectName()).thenReturn("");
 
-        presenter.projectUrlChanged(correctUrl);
+        presenter.onProjectUrlChanged(correctUrl);
 
         verifyInvocationsForCorrectUrl(correctUrl);
     }
@@ -307,7 +307,7 @@ public class GithubImporterPagePresenterTest {
         String correctUrl = "user@host.com:login/repo";
         when(view.getProjectName()).thenReturn("");
 
-        presenter.projectUrlChanged(correctUrl);
+        presenter.onProjectUrlChanged(correctUrl);
 
         verifyInvocationsForCorrectUrl(correctUrl);
     }
@@ -318,7 +318,7 @@ public class GithubImporterPagePresenterTest {
         String correctUrl = "ssh://user@host.com/some/path";
         when(view.getProjectName()).thenReturn("");
 
-        presenter.projectUrlChanged(correctUrl);
+        presenter.onProjectUrlChanged(correctUrl);
 
         verifyInvocationsForCorrectUrl(correctUrl);
     }
@@ -328,7 +328,7 @@ public class GithubImporterPagePresenterTest {
         String correctUrl = "htps://github.com/codenvy/ide.git";
         when(view.getProjectName()).thenReturn("");
 
-        presenter.projectUrlChanged(correctUrl);
+        presenter.onProjectUrlChanged(correctUrl);
 
         verify(view).markURLInvalid();
         verify(view).setURLErrorMessage(eq(locale.importProjectMessageProtocolIncorrect()));
@@ -342,7 +342,7 @@ public class GithubImporterPagePresenterTest {
         String correctName = "angularjs";
         when(view.getProjectName()).thenReturn(correctName);
 
-        presenter.projectNameChanged(correctName);
+        presenter.onProjectNameChanged(correctName);
 
         verify(dataObject).setName(eq(correctName));
         verify(view).markNameValid();
@@ -355,7 +355,7 @@ public class GithubImporterPagePresenterTest {
         String correctName = "Test.project..ForCodenvy";
         when(view.getProjectName()).thenReturn(correctName);
 
-        presenter.projectNameChanged(correctName);
+        presenter.onProjectNameChanged(correctName);
 
         verify(dataObject).setName(eq(correctName));
         verify(view).markNameValid();
@@ -368,7 +368,7 @@ public class GithubImporterPagePresenterTest {
         String emptyName = "";
         when(view.getProjectName()).thenReturn(emptyName);
 
-        presenter.projectNameChanged(emptyName);
+        presenter.onProjectNameChanged(emptyName);
 
         verify(dataObject).setName(eq(emptyName));
         verify(updateDelegate).updateControls();
@@ -379,7 +379,7 @@ public class GithubImporterPagePresenterTest {
         String incorrectName = "angularjs+";
         when(view.getProjectName()).thenReturn(incorrectName);
 
-        presenter.projectNameChanged(incorrectName);
+        presenter.onProjectNameChanged(incorrectName);
 
         verify(dataObject).setName(eq(incorrectName));
         verify(view).markNameInvalid();
@@ -389,7 +389,7 @@ public class GithubImporterPagePresenterTest {
     @Test
     public void projectDescriptionChangedTest() {
         String description = "description";
-        presenter.projectDescriptionChanged(description);
+        presenter.onProjectDescriptionChanged(description);
 
         verify(dataObject).setDescription(eq(description));
     }
@@ -400,12 +400,12 @@ public class GithubImporterPagePresenterTest {
         when(source.getParameters()).thenReturn(parameters);
         when(view.getDirectoryName()).thenReturn("directory");
 
-        presenter.keepDirectorySelected(true);
+        presenter.onKeepDirectorySelected(true);
 
         assertEquals("directory", parameters.get("keepDir"));
         verify(dataObject).setType("blank");
         verify(view).highlightDirectoryNameField(eq(false));
-        verify(view).focusDirectoryNameFiend();
+        verify(view).focusDirectoryNameField();
     }
 
     @Test
@@ -414,11 +414,33 @@ public class GithubImporterPagePresenterTest {
         parameters.put("keepDir", "directory");
         when(source.getParameters()).thenReturn(parameters);
 
-        presenter.keepDirectorySelected(false);
+        presenter.onKeepDirectorySelected(false);
 
         assertTrue(parameters.isEmpty());
         verify(dataObject).setType(eq(null));
         verify(view).highlightDirectoryNameField(eq(false));
+    }
+
+    @Test
+    public void recursiveCloneSelectedTest() {
+        Map<String, String> parameters = new HashMap<>();
+        when(source.getParameters()).thenReturn(parameters);
+        when(view.getDirectoryName()).thenReturn("recursive");
+
+        presenter.onRecursiveSelected(true);
+
+        assertTrue(parameters.containsKey("recursive"));
+    }
+
+    @Test
+    public void recursiveCloneUnSelectedTest() {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("recursive", null);
+        when(source.getParameters()).thenReturn(parameters);
+
+        presenter.onRecursiveSelected(false);
+
+        assertTrue(parameters.isEmpty());
     }
 
     @Test
@@ -428,7 +450,7 @@ public class GithubImporterPagePresenterTest {
         when(view.getDirectoryName()).thenReturn("directory");
         when(view.keepDirectory()).thenReturn(true);
 
-        presenter.keepDirectoryNameChanged("directory");
+        presenter.onKeepDirectoryNameChanged("directory");
 
         assertEquals("directory", parameters.get("keepDir"));
         verify(dataObject, never()).setPath(any());
@@ -443,12 +465,35 @@ public class GithubImporterPagePresenterTest {
         when(source.getParameters()).thenReturn(parameters);
         when(view.keepDirectory()).thenReturn(false);
 
-        presenter.keepDirectoryNameChanged("directory");
+        presenter.onKeepDirectoryNameChanged("directory");
 
         assertTrue(parameters.isEmpty());
         verify(dataObject, never()).setPath(any());
         verify(dataObject).setType(eq(null));
         verify(view).highlightDirectoryNameField(eq(false));
+    }
+
+    @Test
+    public void branchSelectedTest() {
+        Map<String, String> parameters = new HashMap<>();
+        when(source.getParameters()).thenReturn(parameters);
+        when(view.getBranchName()).thenReturn("someBranch");
+
+        presenter.onBranchCheckBoxSelected(true);
+        verify(view).enableBranchNameField(true);
+        verify(view).focusBranchNameField();
+        assertEquals("someBranch", parameters.get("branch"));
+    }
+
+    @Test
+    public void branchNotSelectedTest() {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("branch", "someBranch");
+        when(source.getParameters()).thenReturn(parameters);
+
+        presenter.onBranchCheckBoxSelected(false);
+        verify(view).enableBranchNameField(false);
+        assertTrue(parameters.isEmpty());
     }
 
     @Test

@@ -28,7 +28,6 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -255,9 +254,9 @@ public class GitImporterPagePresenterTest {
 //        presenter.keepDirectorySelected(true);
 //
 //        assertEquals("directory", parameters.get("keepDirectory"));
-//        verify(dataObject).setType("blank");
+//        verify(dataObject).withType("blank");
 //        verify(view).highlightDirectoryNameField(eq(false));
-//        verify(view).focusDirectoryNameFiend();
+//        verify(view).focusDirectoryNameField();
     }
 
     @Test
@@ -303,22 +302,27 @@ public class GitImporterPagePresenterTest {
 //        verify(view).highlightDirectoryNameField(eq(false));
     }
 
-    /**
-     * Branch name field must become enabled when Branch is checked.
-     */
     @Test
     public void branchSelectedTest() {
+        Map<String, String> parameters = new HashMap<>();
+        when(source.getParameters()).thenReturn(parameters);
+        when(view.getBranchName()).thenReturn("someBranch");
+
         presenter.branchSelected(true);
         verify(view).enableBranchNameField(true);
+        verify(view).focusBranchNameField();
+        assertEquals("someBranch", parameters.get("branch"));
     }
 
-    /**
-     * Branch name field must become disabled when Branch is unchecked.
-     */
     @Test
     public void branchNotSelectedTest() {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("branch", "someBranch");
+        when(source.getParameters()).thenReturn(parameters);
+
         presenter.branchSelected(false);
         verify(view).enableBranchNameField(false);
+        assertTrue(parameters.isEmpty());
     }
 
     /**
@@ -339,6 +343,28 @@ public class GitImporterPagePresenterTest {
         when(view.getDirectoryName()).thenReturn("test");
         presenter.keepDirectorySelected(true);
         verify(view).highlightDirectoryNameField(false);
+    }
+
+    @Test
+    public void recursiveCloneSelectedTest() {
+        Map<String, String> parameters = new HashMap<>();
+        when(source.getParameters()).thenReturn(parameters);
+        when(view.getDirectoryName()).thenReturn("recursive");
+
+        presenter.onRecursiveSelected(true);
+
+        assertTrue(parameters.containsKey("recursive"));
+    }
+
+    @Test
+    public void recursiveCloneUnSelectedTest() {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("recursive", null);
+        when(source.getParameters()).thenReturn(parameters);
+
+        presenter.onRecursiveSelected(false);
+
+        assertTrue(parameters.isEmpty());
     }
 
     private void verifyInvocationsForCorrectUrl(String correctUrl) {
