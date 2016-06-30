@@ -711,7 +711,7 @@ public class DockerConnector {
     public void getContainerLogs(final GetContainerLogsParams params, MessageProcessor<LogMessage> containerLogsProcessor)
             throws IOException {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
-                                                            .method("POST")
+                                                            .method("GET")
                                                             .path("/containers/" + params.getContainer() + "/logs")
                                                             .query("stdout", 1)
                                                             .query("stderr", 1)) {
