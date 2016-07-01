@@ -95,6 +95,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -448,7 +449,7 @@ public class DockerConnector {
         final ExecConfig execConfig = new ExecConfig().withCmd(params.getCmd())
                                                       .withAttachStderr(params.isDetach() == Boolean.FALSE)
                                                       .withAttachStdout(params.isDetach() == Boolean.FALSE);
-        byte[] entityBytesArray = toJson(execConfig).getBytes();
+        byte[] entityBytesArray = toJson(execConfig).getBytes(StandardCharsets.UTF_8);
 
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
@@ -476,7 +477,7 @@ public class DockerConnector {
         final ExecStart execStart = new ExecStart().withDetach(params.isDetach() == Boolean.TRUE)
                                                    .withTty(params.isTty() == Boolean.TRUE);
 
-        byte[] entityBytesArray = toJson(execStart).getBytes();
+        byte[] entityBytesArray = toJson(execStart).getBytes(StandardCharsets.UTF_8);
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
                                                             .path("/exec/" + params.getExecId() + "/start")
@@ -1043,7 +1044,7 @@ public class DockerConnector {
      *          when a problem occurs with docker api calls
      */
     public ContainerCreated createContainer(final CreateContainerParams params) throws IOException {
-        byte[] entityBytesArray = toJson(params.getContainerConfig()).getBytes();
+        byte[] entityBytesArray = toJson(params.getContainerConfig()).getBytes(StandardCharsets.UTF_8);
 
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
@@ -1152,7 +1153,7 @@ public class DockerConnector {
      *         when problems occurs with docker api calls
      */
     public NetworkCreated createNetwork(CreateNetworkParams params) throws IOException {
-        byte[] entityBytesArray = toJson(params.getNetwork()).getBytes();
+        byte[] entityBytesArray = toJson(params.getNetwork()).getBytes(StandardCharsets.UTF_8);
 
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
@@ -1185,7 +1186,7 @@ public class DockerConnector {
      *         when problems occurs with docker api calls
      */
     public void connectContainerToNetwork(ConnectContainerToNetworkParams params) throws IOException {
-        byte[] entityBytesArray = toJson(params.getConnectContainer()).getBytes();
+        byte[] entityBytesArray = toJson(params.getConnectContainer()).getBytes(StandardCharsets.UTF_8);
 
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
@@ -1219,7 +1220,7 @@ public class DockerConnector {
      *         when problems occurs with docker api calls
      */
     public void disconnectContainerFromNetwork(DisconnectContainerFromNetworkParams params) throws IOException {
-        byte[] entityBytesArray = toJson(params.getDisconnectContainer()).getBytes();
+        byte[] entityBytesArray = toJson(params.getDisconnectContainer()).getBytes(StandardCharsets.UTF_8);
 
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
