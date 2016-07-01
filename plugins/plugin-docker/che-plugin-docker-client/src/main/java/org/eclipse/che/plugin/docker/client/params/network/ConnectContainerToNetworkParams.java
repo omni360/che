@@ -59,10 +59,6 @@ public class ConnectContainerToNetworkParams {
         return this;
     }
 
-    public String getNetworkId() {
-        return netId;
-    }
-
     /**
      * Adds container identifier to this parameters.
      *
@@ -76,6 +72,10 @@ public class ConnectContainerToNetworkParams {
         requireNonNull(connectContainer);
         this.connectContainer = connectContainer;
         return this;
+    }
+
+    public String getNetworkId() {
+        return netId;
     }
 
     public ConnectContainer getConnectContainer() {
