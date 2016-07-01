@@ -684,25 +684,25 @@ public class DockerConnector {
             return buildImage(dockerConnection,
                               params,
                               progressMonitor);
-        } else {
-            // build context is set of files
-            final File tar = Files.createTempFile(null, ".tar").toFile();
-            try {
-                File[] files = new File[params.getFiles().size()];
-                files = params.getFiles().toArray(files);
-                createTarArchive(tar, files);
-                try (InputStream tarInput = new FileInputStream(tar)) {
-                    DockerConnection dockerConnection = connectionFactory.openConnection(dockerDaemonUri)
-                                                                         .header("Content-Type", "application/x-compressed-tar")
-                                                                         .header("Content-Length", tar.length())
-                                                                         .entity(tarInput);
-                    return buildImage(dockerConnection,
-                                      params,
-                                      progressMonitor);
-                }
-            } finally {
-                FileCleaner.addFile(tar);
+        }
+
+        // build context is set of files
+        final File tar = Files.createTempFile(null, ".tar").toFile();
+        try {
+            File[] files = new File[params.getFiles().size()];
+            files = params.getFiles().toArray(files);
+            createTarArchive(tar, files);
+            try (InputStream tarInput = new FileInputStream(tar)) {
+                DockerConnection dockerConnection = connectionFactory.openConnection(dockerDaemonUri)
+                                                                     .header("Content-Type", "application/x-compressed-tar")
+                                                                     .header("Content-Length", tar.length())
+                                                                     .entity(tarInput);
+                return buildImage(dockerConnection,
+                                  params,
+                                  progressMonitor);
             }
+        } finally {
+            FileCleaner.addFile(tar);
         }
     }
 
