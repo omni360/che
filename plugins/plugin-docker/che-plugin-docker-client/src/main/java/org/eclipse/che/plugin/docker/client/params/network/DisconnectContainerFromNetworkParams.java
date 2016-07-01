@@ -20,7 +20,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Arguments holder for {@link org.eclipse.che.plugin.docker.client.DockerConnector#disconnectContainerFromNetwork(DisconnectContainerFromNetworkParams)}.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class DisconnectContainerFromNetworkParams {
     private String              netId;

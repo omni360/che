@@ -16,7 +16,7 @@ import java.util.Objects;
 /**
  * Represents docker network description.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class Network {
     private String                          name;

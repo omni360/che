@@ -16,7 +16,7 @@ import java.util.Objects;
 /**
  * Represents configuration that should be passed to docker API to create new network.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class NewNetwork {
     private String              name;

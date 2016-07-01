@@ -15,7 +15,7 @@ import java.util.Objects;
 /**
  * Represents configuration that should be passed to docker API to disconnect container from network.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class DisconnectContainer {
     private String  container;

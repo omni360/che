@@ -18,7 +18,7 @@ import java.util.Objects;
 /**
  * Represents description of network inside {@link org.eclipse.che.plugin.docker.client.json.ContainerConfig}
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class NetworkingConfig {
     private Map<String, EndpointConfig> endpointsConfig;

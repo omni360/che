@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.docker.client.json.network;
 import java.util.Objects;
 
 /**
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class NewIpamConfig {
     private String iPv4Address;

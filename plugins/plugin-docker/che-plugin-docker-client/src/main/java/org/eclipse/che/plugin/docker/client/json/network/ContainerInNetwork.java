@@ -15,7 +15,7 @@ import java.util.Objects;
 /**
  * Represents description of container inside {@link Network}.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class ContainerInNetwork {
     private String name;

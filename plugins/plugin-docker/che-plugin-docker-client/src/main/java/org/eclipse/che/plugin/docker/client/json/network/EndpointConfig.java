@@ -16,7 +16,7 @@ import java.util.Objects;
 /**
  * Represents description of network needed to connect container into.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class EndpointConfig {
     private NewIpamConfig iPAMConfig;
