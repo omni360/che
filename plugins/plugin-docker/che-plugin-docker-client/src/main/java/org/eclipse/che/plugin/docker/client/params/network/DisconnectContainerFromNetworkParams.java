@@ -59,10 +59,6 @@ public class DisconnectContainerFromNetworkParams {
         return this;
     }
 
-    public String getNetworkId() {
-        return netId;
-    }
-
     /**
      * Adds container identifier to this parameters.
      *
@@ -76,6 +72,10 @@ public class DisconnectContainerFromNetworkParams {
         requireNonNull(disconnectContainer);
         this.disconnectContainer = disconnectContainer;
         return this;
+    }
+
+    public String getNetworkId() {
+        return netId;
     }
 
     public DisconnectContainer getDisconnectContainer() {
