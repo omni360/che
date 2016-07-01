@@ -15,7 +15,7 @@ import java.util.Objects;
 /**
  * Represents response from docker API on successful creation of network.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class NetworkCreated {
     private String id;

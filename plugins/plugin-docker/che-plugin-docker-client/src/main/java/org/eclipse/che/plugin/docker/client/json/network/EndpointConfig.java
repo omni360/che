@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client.json.network;
 
-import java.util.List;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -20,8 +20,8 @@ import java.util.Objects;
  */
 public class EndpointConfig {
     private NewIpamConfig iPAMConfig;
-    private List<String>  links;
-    private List<String>  aliases;
+    private String[]      links;
+    private String[]      aliases;
 
     public NewIpamConfig getIPAMConfig() {
         return iPAMConfig;
@@ -36,28 +36,28 @@ public class EndpointConfig {
         return this;
     }
 
-    public List<String> getLinks() {
+    public String[] getLinks() {
         return links;
     }
 
-    public void setLinks(List<String> links) {
+    public void setLinks(String[] links) {
         this.links = links;
     }
 
-    public EndpointConfig withLinks(List<String> links) {
+    public EndpointConfig withLinks(String[] links) {
         this.links = links;
         return this;
     }
 
-    public List<String> getAliases() {
+    public String[] getAliases() {
         return aliases;
     }
 
-    public void setAliases(List<String> aliases) {
+    public void setAliases(String[] aliases) {
         this.aliases = aliases;
     }
 
-    public EndpointConfig withAliases(List<String> aliases) {
+    public EndpointConfig withAliases(String[] aliases) {
         this.aliases = aliases;
         return this;
     }
@@ -68,8 +68,8 @@ public class EndpointConfig {
         if (!(o instanceof EndpointConfig)) return false;
         EndpointConfig that = (EndpointConfig)o;
         return Objects.equals(iPAMConfig, that.iPAMConfig) &&
-               Objects.equals(links, that.links) &&
-               Objects.equals(aliases, that.aliases);
+               Arrays.equals(links, that.links) &&
+               Arrays.equals(aliases, that.aliases);
     }
 
     @Override
@@ -81,8 +81,8 @@ public class EndpointConfig {
     public String toString() {
         return "EndpointConfig{" +
                "iPAMConfig=" + iPAMConfig +
-               ", links=" + links +
-               ", aliases=" + aliases +
+               ", links=" + Arrays.toString(links) +
+               ", aliases=" + Arrays.toString(aliases) +
                '}';
     }
 }

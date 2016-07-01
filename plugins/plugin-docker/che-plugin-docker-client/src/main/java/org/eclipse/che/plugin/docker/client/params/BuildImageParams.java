@@ -162,11 +162,11 @@ public class BuildImageParams {
      *         if other parameter incompatible with files is set
      */
     public BuildImageParams withFiles(@NotNull File... files) {
-        requireNonNull(files);
-        requireNonEmptyArray(files);
         if (remote != null) {
             throw new IllegalStateException("Remote parameter is already set. Remote and files parameters are mutually exclusive.");
         }
+        requireNonNull(files);
+        requireNonEmptyArray(files);
         this.files = new ArrayList<>(files.length + 1);
         return addFiles(files);
     }
