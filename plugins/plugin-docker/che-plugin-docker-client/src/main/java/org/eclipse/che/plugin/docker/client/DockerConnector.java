@@ -85,7 +85,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.MediaType;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -1124,7 +1123,7 @@ public class DockerConnector {
      * @throws IOException
      *         when problems occurs with docker api calls
      */
-    public Network inspectNetwork(@NotNull String netId) throws IOException {
+    public Network inspectNetwork(String netId) throws IOException {
         return inspectNetwork(InspectNetworkParams.create(netId));
     }
 
@@ -1207,7 +1206,7 @@ public class DockerConnector {
      * @throws IOException
      *         when problems occurs with docker api calls
      */
-    public void disconnectContainerFromNetwork(@NotNull String netId, @NotNull String containerId) throws IOException {
+    public void disconnectContainerFromNetwork(String netId, String containerId) throws IOException {
         disconnectContainerFromNetwork(
                 DisconnectContainerFromNetworkParams.create(netId,
                                                             new DisconnectContainer().withContainer(containerId)));
@@ -1241,7 +1240,7 @@ public class DockerConnector {
      * @throws IOException
      *         when a problem occurs with docker api calls
      */
-    public void removeNetwork(@NotNull String netId) throws IOException {
+    public void removeNetwork(String netId) throws IOException {
         removeNetwork(RemoveNetworkParams.create(netId));
     }
 
