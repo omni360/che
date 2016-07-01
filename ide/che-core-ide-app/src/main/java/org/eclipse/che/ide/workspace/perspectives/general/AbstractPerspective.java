@@ -22,6 +22,7 @@ import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.PartStackView;
 import org.eclipse.che.ide.api.parts.Perspective;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.PartStackPresenterFactory;
 import org.eclipse.che.ide.workspace.PartStackViewFactory;
 import org.eclipse.che.ide.workspace.WorkBenchControllerFactory;
@@ -214,6 +215,22 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
 
         if (rules.isEmpty() && !destPartStack.containsPart(part)) {
             destPartStack.addPart(part, constraint);
+
+            return;
+        }
+
+        if (rules.contains(perspectiveId)) {
+            destPartStack.addPart(part, constraint);
+        }
+    }
+
+    public void addPart(@NotNull PartPresenter part, @NotNull PartStackType type, @Nullable Constraints constraint, boolean newPartStack) {
+        PartStack destPartStack = partStacks.get(type);
+
+        List<String> rules = part.getRules();
+
+        if (rules.isEmpty() && !destPartStack.containsPart(part)) {
+            destPartStack.addPart(part, constraint, newPartStack);
 
             return;
         }

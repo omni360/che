@@ -34,6 +34,13 @@ public interface EditorAgent {
     void openEditor(@NotNull final VirtualFile file);
 
     /**
+     * Open editor with given file
+     *
+     * @param file the file to open
+     */
+    void openEditor(@NotNull final VirtualFile file, boolean newPartStack);
+
+    /**
      * Close editor with given file
      *
      * @param file the file to close

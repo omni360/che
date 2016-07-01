@@ -15,6 +15,9 @@ import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
+import org.eclipse.che.ide.api.parts.EditorPartStack;
+import org.eclipse.che.ide.part.editor.EditorPartStackFactory;
+import org.eclipse.che.ide.part.editor.EditorPartStackPresenter;
 import org.eclipse.che.ide.part.widgets.TabItemFactory;
 import org.eclipse.che.ide.part.widgets.editortab.EditorTab;
 import org.eclipse.che.ide.part.widgets.editortab.EditorTabWidget;
@@ -38,5 +41,8 @@ public class IDEClientModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().implement(PartButton.class, PartButtonWidget.class)
                                              .implement(EditorTab.class, EditorTabWidget.class)
                                              .build(TabItemFactory.class));
+
+        install(new GinFactoryModuleBuilder().implement(EditorPartStack.class, EditorPartStackPresenter.class)
+                                             .build(EditorPartStackFactory.class));
     }
 }

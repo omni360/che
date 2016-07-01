@@ -61,6 +61,7 @@ import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
+import org.eclipse.che.ide.util.loging.Log;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -71,6 +72,7 @@ import java.util.List;
 import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.CLOSE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
+import static org.eclipse.che.ide.api.parts.PartStackType.MULTI_EDITING;
 
 /** @author Evgen Vidolob */
 @Singleton
@@ -284,7 +286,12 @@ public class EditorAgentImpl implements EditorAgent {
     /** {@inheritDoc} */
     @Override
     public void openEditor(@NotNull final VirtualFile file) {
-        doOpen(file, new OpenEditorCallbackImpl());
+        doOpen(file, new OpenEditorCallbackImpl(), false);
+    }
+
+    @Override
+    public void openEditor(@NotNull VirtualFile file, boolean newPartStack) {
+        doOpen(file, null, newPartStack);
     }
 
     /** {@inheritDoc} */
@@ -298,23 +305,25 @@ public class EditorAgentImpl implements EditorAgent {
     /** {@inheritDoc} */
     @Override
     public void openEditor(@NotNull VirtualFile file, @NotNull OpenEditorCallback callback) {
-        doOpen(file, callback);
+        doOpen(file, callback, false);
     }
 
-    private void doOpen(final VirtualFile file, final OpenEditorCallback callback) {
+    private void doOpen(final VirtualFile file, final OpenEditorCallback callback, boolean newPartStack) {
         EditorPartPresenter openedEditor = getOpenedEditor(Path.valueOf(file.getPath()));
-        if (openedEditor != null) {
-            workspace.setActivePart(openedEditor, EDITING);
-            callback.onEditorActivated(openedEditor);
-        } else {
+//        if (openedEditor != null) {
+//            workspace.setActivePart(openedEditor, MULTI_EDITING);
+//            callback.onEditorActivated(openedEditor);
+//        } else {
             FileType fileType = fileTypeRegistry.getFileTypeByFile(file);
             EditorProvider editorProvider = editorRegistry.getEditor(fileType);
             final EditorPartPresenter editor = editorProvider.getEditor();
 
             editor.init(new EditorInputImpl(fileType, file), callback);
             editor.addCloseHandler(editorClosed);
+        Log.error(getClass(), "======///// Active Editor" + getActiveEditor());
 
-            workspace.openPart(editor, EDITING);
+
+            workspace.openPart(editor, MULTI_EDITING, newPartStack);
             openedEditors.add(editor);
 
             workspace.setActivePart(editor);
@@ -334,7 +343,7 @@ public class EditorAgentImpl implements EditorAgent {
                 }
             });
 
-        }
+//        }
     }
 
     /** {@inheritDoc} */

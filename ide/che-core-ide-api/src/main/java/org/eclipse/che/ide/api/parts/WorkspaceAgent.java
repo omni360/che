@@ -43,6 +43,8 @@ public interface WorkspaceAgent {
      */
     void openPart(PartPresenter part, PartStackType type);
 
+    void openPart(PartPresenter part, PartStackType type, boolean newPartStack);
+
     /**
      * Opens Part with constraint
      *

@@ -44,6 +44,8 @@ public interface PartStack extends Presenter {
      */
     void addPart(PartPresenter part, Constraints constraint);
 
+    void addPart(PartPresenter part, Constraints constraint, boolean newPartStack);
+
     /**
      * Ask if PartStack contains given Part.
      *

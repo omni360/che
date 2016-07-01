@@ -163,6 +163,11 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
         onRequestFocus();
     }
 
+    @Override
+    public void addPart(PartPresenter part, Constraints constraint, boolean newPartStack) {
+        addPart(part, constraint);
+    }
+
     private void sortPartsOnView() {
         List<PartPresenter> sortedParts = new ArrayList<>();
         sortedParts.addAll(parts.values());

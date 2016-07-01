@@ -93,6 +93,8 @@ public interface Perspective {
      */
     void addPart(@NotNull PartPresenter part, @NotNull PartStackType type, @Nullable Constraints constraint);
 
+    void addPart(@NotNull PartPresenter part, @NotNull PartStackType type, @Nullable Constraints constraint, boolean newPartStack);
+
     /**
      * Retrieves the instance of the {@link PartStack} for given {@link PartStackType}
      *

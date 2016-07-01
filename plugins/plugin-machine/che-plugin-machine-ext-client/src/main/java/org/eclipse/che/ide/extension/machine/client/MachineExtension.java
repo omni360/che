@@ -119,7 +119,7 @@ public class MachineExtension {
                 /* Do not show terminal on factories by default */
                 if (appContext.getFactory() == null) {
                     consolesPanelPresenter.newTerminal();
-                    workspaceAgent.setActivePart(consolesPanelPresenter);
+//                    workspaceAgent.setActivePart(consolesPanelPresenter);
                 }
             }
         });
